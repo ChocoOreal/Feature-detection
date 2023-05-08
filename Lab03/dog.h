@@ -39,14 +39,16 @@ public:
 	vector<DogKeypoint> getKeypoints() {
 		vector<DogKeypoint> returnedKPs;
 		for (int i = 0; i < keypoints.size(); i++) {
-			returnedKPs.push_back(keypoints[i]);
+			DogKeypoint kp = keypoints[i];
+			kp.s -= 1;
+			returnedKPs.push_back(kp);
 		}
 		return returnedKPs;
 	}
 	vector<vector<Mat>> getGaussSpace() {
 		vector<vector<Mat>> returnedGaussSpace(numOctave);
 		for (int i = 0; i < gaussSpace.size(); i++) {
-			for (int j = 0; j < gaussSpace[0].size(); j++) {
+			for (int j = 1; j < gaussSpace[0].size() - 2; j++) {
 				returnedGaussSpace[i].push_back(gaussSpace[i][j].clone());
 			}
 		}

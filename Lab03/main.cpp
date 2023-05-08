@@ -33,10 +33,10 @@ int main() {
 	img.convertTo(imgColor, CV_8UC1, 255.0);
 	cvtColor(imgColor, imgColor, COLOR_GRAY2BGR, 3);
 	showHarrisCorners(img, original, 5, 0.0003, Scalar(0, 0, 255));*/
-	//Mat final = detectBlob(img, original, 0.08);
+	//Mat final = detectBlob(img1, original1,0.1);
 	/*Mat final = detectDog(img, original);*/
 
-	Mat res = matchBySIFT(img1, img2, 0.8, original1, original2);
+	Mat res = matchBySIFT(img1, img2, 3, 0.8, original1, original2);
 
 	//vector<vector<Mat>> gaussSpace;
 	//vector<DogKeypoint> dogkeypoints = findInterestedPoints(img2, gaussSpace);
@@ -47,7 +47,7 @@ int main() {
 	//vector<siftKeypoints> siftkps = siftmodel.getSiftKPs();
 	//for (int i = 0; i < 10; i++)
 	//	cout << siftkps[i].feature;
-
+	
 	imshow("res", res);
 	waitKey(0);
 }

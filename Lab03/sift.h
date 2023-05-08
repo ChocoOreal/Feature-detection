@@ -1,6 +1,8 @@
 #pragma once
 #include <opencv2/opencv.hpp>
 #include "dog.h"
+#include "blob.h"
+#include "harris.h"
 using namespace cv;
 using namespace std;
 
@@ -34,4 +36,5 @@ public:
 		return siftKPs;
 	}
 };
-Mat matchBySIFT(Mat img1, Mat img2, double relativeThreshold, Mat originalImg1, Mat originalImg2);
+
+Mat matchBySIFT(Mat img1, Mat img2, int detector, double relativeThreshold, Mat originalImg1, Mat originalImg2);

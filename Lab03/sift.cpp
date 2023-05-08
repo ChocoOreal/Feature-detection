@@ -12,7 +12,7 @@ void MySIFT::computeGradient() {
 	}
 
 	for (int o = 0; o < numOctave; o++) {
-		for (int s = 1; s <= numLayer - 3; s++) {
+		for (int s = 0; s < numLayer; s++) {
 			for (int i = 1; i < gaussSpace[o][s].rows - 1; i++) {
 				for (int j = 1; j < gaussSpace[o][s].cols - 1; j++) {
 					double currentX = (gaussSpace[o][s].at<double>(i + 1, j) - gaussSpace[o][s].at<double>(i - 1, j)) * 0.5;
@@ -31,7 +31,7 @@ void MySIFT::computeOrientation(double minDist, double oriScale, int nbins, doub
 	vector<double> histogram(nbins, 0);
 	vector<vector<Mat>> gradient;
 	int numOctave = gaussSpace.size();
-	int numLayer = gaussSpace[0].size() - 3;
+	int numLayer = gaussSpace[0].size();
 	vector<DogKeypoint> newKPs;
 	int countLoop = 0;
 
@@ -110,7 +110,7 @@ void MySIFT::computeOrientation(double minDist, double oriScale, int nbins, doub
 				else k = i - 1;
 				if (smoothedHist[i] > smoothedHist[k] && smoothedHist[i] > smoothedHist[(i + 1) % nbins])
 				{
-					double left = smoothedHist[i - 1];
+					double left = smoothedHist[k];
 					double right = smoothedHist[(i + 1) % nbins];
 
 					// reference https://ccrma.stanford.edu/~jos/sasp/Quadratic_Interpolation_Spectral_Peaks.html
@@ -251,21 +251,37 @@ void MySIFT::constructKeypointDescriptor(double minDist, int nhist, int nori, do
 	delete[] h;
 }
 
-Mat matchBySIFT(Mat img1, Mat img2, double relativeThreshold, Mat originalImg1, Mat originalImg2) {
+Mat matchBySIFT(Mat img1, Mat img2, int detector,double relativeThreshold, Mat originalImg1, Mat originalImg2) {
 	vector<vector<Mat>> gaussSpace1;
 	vector<vector<Mat>> gaussSpace2;
-	vector<DogKeypoint> dogkeypoints1 = findInterestedPoints(img1, gaussSpace1);
-	cout << "dogkp1 " << dogkeypoints1.size() << "\n";
-	vector<DogKeypoint> dogkeypoints2 = findInterestedPoints(img2, gaussSpace2);
+	vector<DogKeypoint> dogkeypoints1;
+	vector<DogKeypoint> dogkeypoints2;
+	double minDist = 1.0;
+	if (detector == 1) {
+		dogkeypoints1 = findInterestedPoints(img1, gaussSpace1);
+		cout << "dogkp1 " << dogkeypoints1.size() << "\n";
+		dogkeypoints2 = findInterestedPoints(img2, gaussSpace2);
+		minDist = 0.5;
+	}
+	else if (detector == 2) {
+		dogkeypoints1 = findBlobInterestedPoints(img1, gaussSpace1, 0.1);
+		dogkeypoints2 = findBlobInterestedPoints(img2, gaussSpace2, 0.1);
+		minDist = 1;
+	}
+	else if (detector == 3) {
+		dogkeypoints1 = getHarrisKeypoint(img1, gaussSpace1, 5, 0.08);
+		dogkeypoints2 = getHarrisKeypoint(img2, gaussSpace2, 5, 0.08);
+		minDist = 1;
+	}
 	MySIFT* siftmodel1 = new MySIFT(gaussSpace1, dogkeypoints1, img1);
 	MySIFT* siftmodel2 = new MySIFT(gaussSpace2, dogkeypoints2, img2);
 	siftmodel1->computeGradient();
 	siftmodel2->computeGradient();
-	siftmodel1->computeOrientation(0.5, 1.5, 36);
-	siftmodel2->computeOrientation(0.5, 1.5, 36);
+	siftmodel1->computeOrientation(minDist, 1.5, 36);
+	siftmodel2->computeOrientation(minDist, 1.5, 36);
 
-	siftmodel1->constructKeypointDescriptor(0.5, 4, 8, 6);
-	siftmodel2->constructKeypointDescriptor(0.5, 4, 8, 6);
+	siftmodel1->constructKeypointDescriptor(minDist, 4, 8, 6);
+	siftmodel2->constructKeypointDescriptor(minDist, 4, 8, 6);
 	vector<siftKeypoints> siftkps1 = siftmodel1->getSiftKPs();
 	vector<siftKeypoints> siftkps2 = siftmodel2->getSiftKPs();
 	vector<int> keypointmatch;
@@ -309,10 +325,11 @@ Mat matchBySIFT(Mat img1, Mat img2, double relativeThreshold, Mat originalImg1, 
 	Mat res(newrows, newcols, originalImg1.type());
 	originalImg1.copyTo(res(Rect(0, 0, img1.cols, img1.rows)));
 	originalImg2.copyTo(res(Rect(img1.cols, 0, img2.cols, img2.rows)));
-	int R = rand() % (255);
-	int G = rand() % (255);
-	int B = rand() % (255);
+	
 	for (int i = 0; i < keypointmatch.size() - 2; i += 2) {
+		int R = rand() % (255);
+		int G = rand() % (255);
+		int B = rand() % (255);
 		int ind1 = keypointmatch[i];
 		int ind2 = keypointmatch[i + 1];
 		line(res, Point(siftkps1[ind1].y, siftkps1[ind1].x), Point(siftkps2[ind2].y + img1.cols, siftkps2[ind2].x), Scalar(B, G, R));

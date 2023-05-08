@@ -264,23 +264,15 @@ vector<DogKeypoint> findInterestedPoints(Mat img, vector<vector<Mat>>& gaussSpac
 	int numSpace = 3;
 	double minSigma = 0.8;
 	double contrastThreshold = 0.015;
-	MyDOG* dog = new MyDOG(img, minDist, numOctave, numSpace, minSigma, 0);
-	dog->computeGaussSpace();
-	dog->computeDoGSpace();
-	dog->findExtremaOfDogSpace(contrastThreshold);
-	dog->localizeKeypoints(contrastThreshold);
-	dog->discardKeypointsOnEdge(10);
-	vector<DogKeypoint> kps = dog->getKeypoints();
-	gaussSpace = dog->getGaussSpace();
-	//for (auto it = kps.begin(); it != kps.end(); it++) {
-	//	/*DogKeypoint cur;
-	//	cur.x = it->x * pow(2, it->octave) * minDist;
-	//	cur.y = it->y * pow(2, it->octave) * minDist;
-	//	cur.sigma = it->sigma;
-	//	cur.octave = it->octave;
-	//	cur.s = it->s;
-	//	keypoints.push_back(cur);*/
-	//}
+	MyDOG dog(img, minDist, numOctave, numSpace, minSigma, 0);
+	dog.computeGaussSpace();
+	dog.computeDoGSpace();
+	dog.findExtremaOfDogSpace(contrastThreshold);
+	dog.localizeKeypoints(contrastThreshold);
+	dog.discardKeypointsOnEdge(10);
+	vector<DogKeypoint> kps = dog.getKeypoints();
+	gaussSpace = dog.getGaussSpace();
+	
 	return kps;
 }
 
