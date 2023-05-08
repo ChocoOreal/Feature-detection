@@ -133,20 +133,31 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="blob.cpp" />
+    <ClCompile Include="dog.cpp" />
     <ClCompile Include="filter.cpp" />
     <ClCompile Include="harris.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="parallelFilter.cpp" />
+    <ClCompile Include="sift.cpp" />
     <ClCompile Include="sobel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blob.h" />
+    <ClInclude Include="dog.h" />
     <ClInclude Include="filter.h" />
     <ClInclude Include="harris.h" />
+    <ClInclude Include="parallelFilter.h" />
+    <ClInclude Include="sift.h" />
     <ClInclude Include="sobel.h" />
+    <ClInclude Include="structure.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\Downloads\blobs.png" />
     <Image Include="..\..\..\..\Pictures\art1.jpg" />
+    <Image Include="..\..\..\..\Pictures\blobs2.png" />
     <Image Include="..\..\..\..\Pictures\girl3.jpg" />
+    <Image Include="..\..\..\..\Pictures\sunflowers.jpeg" />
+    <Image Include="D:\CV\02_.jpg" />
     <Image Include="D:\CV\TestImages\02.jpg" />
     <Image Include="D:\Pics\girl.jpg" />
     <Image Include="D:\Pics\tea.jpg" />

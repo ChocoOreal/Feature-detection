@@ -30,6 +30,15 @@
     <ClCompile Include="blob.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="parallelFilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sift.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="harris.h">
@@ -42,6 +51,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="blob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parallelFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="structure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sift.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -59,6 +80,18 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="D:\Pics\girl.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\..\Pictures\sunflowers.jpeg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\..\Downloads\blobs.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\..\Pictures\blobs2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="D:\CV\02_.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
