@@ -1,16 +1,7 @@
 #include "dog.h"
 
-// find gaussian space to approximate DoG.
-// Our pyramid will have numOctave octaves, each octaves include images of different size
-// numSpace is our desirable number of DoG layers in an octave
-// minSigma is the smallest sigma to start with in one octave
-// assumedSigma is the sigma already corporated with the input image
-void MyDOG::computeGaussSpace() {
-	Mat baseImg;
-	Mat imgInOctave;
-
-	resize(img, baseImg, Size(), 1/ minDist, 1 / minDist, INTER_LINEAR);
-	
+// generate gaussian kernel for each octaves
+void MyDOG::generateKernel() {
 
 	// If an image already has a blur scale of sigma1, after scaling it with sigma2, the final image
 	// will be having blur scale of sigma that satisfies sigma^2 = sigma1^2 + sigma2^2
@@ -24,14 +15,10 @@ void MyDOG::computeGaussSpace() {
 	// 1/dist * sigma for blur scale.
 	double currentSigma = 1 / minDist * sqrt(minSigma * minSigma - assumedSigma * assumedSigma);
 	int kernelSize = floor(currentSigma) * 6 + 1; // We want to assure that the size of kernel wont be too small
-	double* kernel = new double[kernelSize * kernelSize];
-	gaussianKernel(kernel, kernelSize, currentSigma);
-	Mat kernelMat(kernelSize, kernelSize, CV_64F, kernel);
-
-	// Now we blur the baseImg with sigma found
-	filter2D(baseImg, imgInOctave, -1, kernelMat, Point(-1, -1), 0.0, BORDER_CONSTANT);
-	gaussSpace[0].push_back(imgInOctave.clone());
-	delete[] kernel;
+	double* kernelArray = new double[kernelSize * kernelSize];
+	gaussianKernel(kernelArray, kernelSize, currentSigma);
+	Mat kernelMat(kernelSize, kernelSize, CV_64F, kernelArray);
+	kernel.push_back(kernelMat);
 
 	// The factor for multiplying sigma after each iteration is 2^(1 / numSpace)
 	// Our numSpace should have +3 since after taking DoG, the numSpace will be decreased by 1
@@ -40,16 +27,37 @@ void MyDOG::computeGaussSpace() {
 	for (int s = 1; s <= numSpace + 2; s++) {
 		double sig1 = pow(2.0, 2.0 * s / numSpace);
 		double sig2 = pow(2.0, 2.0 * (s - 1) / numSpace);
-		currentSigma = minSigma / minDist * sqrt( sig1 - sig2 );
+		currentSigma = minSigma / minDist * sqrt(sig1 - sig2);
 		kernelSize = floor(currentSigma) * 6 + 1; // We want to assure that the size of kernel wont be too small
-		kernel = new double[kernelSize * kernelSize];
-		gaussianKernel(kernel, kernelSize, currentSigma);
-		
-		kernelMat = Mat(kernelSize, kernelSize, CV_64F, kernel);
-		filter2D(gaussSpace[0][s - 1], imgInOctave, -1, kernelMat, Point(-1, -1), 0.0, BORDER_CONSTANT);
-		gaussSpace[0].push_back(imgInOctave.clone());
+		kernelArray = new double[kernelSize * kernelSize];
+		gaussianKernel(kernelArray, kernelSize, currentSigma);
 
-		delete[] kernel;
+		kernelMat = Mat(kernelSize, kernelSize, CV_64F, kernelArray);
+		kernel.push_back(kernelMat);
+
+	}
+}
+
+
+// find gaussian space to approximate DoG.
+// Our pyramid will have numOctave octaves, each octaves include images of different size
+// numSpace is our desirable number of DoG layers in an octave
+// minSigma is the smallest sigma to start with in one octave
+// assumedSigma is the sigma already corporated with the input image
+void MyDOG::computeGaussSpace() {
+	Mat baseImg;
+	Mat imgInOctave;
+
+	resize(img, baseImg, Size(), 1/ minDist, 1 / minDist, INTER_LINEAR);
+		
+	// Now we blur the baseImg with gaussian kernel found
+	filter2D(baseImg, imgInOctave, -1, kernel[0], Point(-1, -1), 0.0, BORDER_CONSTANT);
+	gaussSpace[0].push_back(imgInOctave.clone());
+
+	
+	for (int s = 1; s <= numSpace + 2; s++) {
+		filter2D(gaussSpace[0][s - 1], imgInOctave, -1, kernel[s], Point(-1, -1), 0.0, BORDER_CONSTANT);
+		gaussSpace[0].push_back(imgInOctave.clone());
 	}
 	double dist = minDist;
 	// Compute subsequent octaves
@@ -62,20 +70,11 @@ void MyDOG::computeGaussSpace() {
 		// current octave. (An octave ends when sigma of current layer is twice that of the
 		// beginning layer of the octave)
 
-		resize(gaussSpace[o - 1][numSpace], imgInOctave, Size(), 0.5, 0.5, INTER_LINEAR);
+		resize(gaussSpace[o - 1][numSpace], imgInOctave, Size(), 0.5, 0.5, INTER_AREA);
 		gaussSpace[o].push_back(imgInOctave.clone());
 		for (int s = 1; s <= numSpace + 2; s++) {
-			currentSigma = minSigma / minDist * sqrt(pow(2.0, 2.0 * s / numSpace) - pow(2.0, 2.0 * (s - 1) / numSpace));
-
-			kernelSize = floor(currentSigma) * 6 + 1; // We want to assure that the size of kernel wont be too small
-			kernel = new double[kernelSize * kernelSize];
-			gaussianKernel(kernel, kernelSize, currentSigma);
-			kernelMat = Mat(kernelSize, kernelSize, CV_64F, kernel);
-
-			filter2D(gaussSpace[o][s - 1], imgInOctave, -1, kernelMat, Point(-1, -1), 0.0, BORDER_CONSTANT);
+			filter2D(gaussSpace[o][s - 1], imgInOctave, -1, kernel[s], Point(-1, -1), 0.0, BORDER_CONSTANT);
 			gaussSpace[o].push_back(imgInOctave.clone());
-
-			delete[] kernel;
 		}
 	}
 }
@@ -236,26 +235,30 @@ Mat MyDOG::hessian(int octave, int layer, int x, int y) {
 
 void MyDOG::quadraticInterpolate(Mat& offset, double& value, double dogValue, Mat hessian, Mat gradient) {
 	offset = - hessian.inv() * gradient;
-	/*cout << gradient.size() << "\n";
-	cout << hessian.size() << "\n";*/
 	Mat temp =  0.5 * gradient.t() * hessian.inv() * gradient;
 	value = dogValue - temp.at<double>(0, 0);
 }
 
 
-//Mat detectDog(Mat img, Mat oc) {
-//	vector<vector<Mat>> gaussSpace = computeGaussSpace(img, 0.5, 5, 3, 0.8, 0);
-//	vector<vector<Mat>> dogSpace = computeDoGSpace(gaussSpace);
-//	vector <DogKeypoint> kps = findExtremaOfDogSpace(dogSpace, 0.015);
-//	kps = localizeKeypoints(kps, dogSpace, 0.8, 0.5, 0.015);
-//	for (int i = 0; i < kps.size(); i++) {
-//		double r = kps[i].sigma * sqrt(2);
-//		int x = kps[i].x * pow(2, kps[i].octave) * 0.5;
-//		int y = kps[i].y * pow(2, kps[i].octave) * 0.5;
-//		circle(oc, Point(y, x), r, Scalar(0, 0, 255), 2);
-//	}
-//	return oc;
-//}
+Mat detectDog(Mat img, Mat oc, int numOctave, int numLayer, double minSigma, double contrastThreshold, double edgeThreshold) {
+	double minDist = 0.5;
+	cout << "detecting DoG with " << numOctave << " octaves, " << numLayer << "layers per octave, " << "min sigma " << minSigma <<
+		", contrast threshold " << contrastThreshold << ", edge threshold " << edgeThreshold <<"\n";
+	MyDOG dog(img, minDist, numOctave, numLayer, minSigma, 0);
+	dog.generateKernel();
+	dog.computeGaussSpace();
+	dog.computeDoGSpace();
+	dog.findExtremaOfDogSpace(contrastThreshold);
+	dog.localizeKeypoints(contrastThreshold);
+	dog.discardKeypointsOnEdge(edgeThreshold);
+	vector<DogKeypoint> kps = dog.getKeypoints();
+	cout << "Total keypoints found" << kps.size() << "\n";
+	for (int i = 0; i < kps.size(); i++) {
+		circle(oc, Point(kps[i].y, kps[i].x), kps[i].sigma * sqrt(2), Scalar(0, 0, 255), 2);
+	}
+	return oc;
+}
+
 
 vector<DogKeypoint> findInterestedPoints(Mat img, vector<vector<Mat>>& gaussSpace) {
 	vector<DogKeypoint> keypoints;
@@ -264,13 +267,18 @@ vector<DogKeypoint> findInterestedPoints(Mat img, vector<vector<Mat>>& gaussSpac
 	int numSpace = 3;
 	double minSigma = 0.8;
 	double contrastThreshold = 0.015;
+	cout << "detecting DoG keypoints with " << numOctave << " octaves, " << numSpace << "layers per octave, "
+		<< "min sigma is " << minSigma << ", contrast threshold is " << contrastThreshold << "\n";
+
 	MyDOG dog(img, minDist, numOctave, numSpace, minSigma, 0);
+	dog.generateKernel();
 	dog.computeGaussSpace();
 	dog.computeDoGSpace();
 	dog.findExtremaOfDogSpace(contrastThreshold);
 	dog.localizeKeypoints(contrastThreshold);
 	dog.discardKeypointsOnEdge(10);
 	vector<DogKeypoint> kps = dog.getKeypoints();
+	cout << "Total keypoints found " << kps.size() << "\n";
 	gaussSpace = dog.getGaussSpace();
 	
 	return kps;

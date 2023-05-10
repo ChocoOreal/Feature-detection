@@ -18,13 +18,16 @@ Mat computeHarrisResponse(Mat img) {
 	Mat Ix2_ = Ix.mul(Ix);
 	Mat Iy2_ = Iy.mul(Iy);
 	Mat Ixy_ = Ix.mul(Iy);
-	copyMakeBorder(Ix2_, Ix2, 1, 1, 1, 1, BORDER_CONSTANT);
+	/*copyMakeBorder(Ix2_, Ix2, 1, 1, 1, 1, BORDER_CONSTANT);
 	copyMakeBorder(Iy2_, Iy2, 1, 1, 1, 1, BORDER_CONSTANT);
-	copyMakeBorder(Ixy_, Ixy, 1, 1, 1, 1, BORDER_CONSTANT);
+	copyMakeBorder(Ixy_, Ixy, 1, 1, 1, 1, BORDER_CONSTANT);*/
 
-	Ix2 = filter(Ix2, harrisWindow);
+	/*Ix2 = filter(Ix2, harrisWindow);
 	Iy2 = filter(Iy2, harrisWindow);
-	Ixy = filter(Ixy, harrisWindow);
+	Ixy = filter(Ixy, harrisWindow);*/
+	filter2D(Ix2_, Ix2, -1, harrisWindow, Point(-1, -1), 0.0, BORDER_CONSTANT);
+	filter2D(Iy2_, Iy2, -1, harrisWindow, Point(-1, -1), 0.0, BORDER_CONSTANT);
+	filter2D(Ixy_, Ixy, -1, harrisWindow, Point(-1, -1), 0.0, BORDER_CONSTANT);
 
 	Mat det = Ix2.mul(Iy2) - Ixy.mul(Ixy);
 	Mat trace = Ix2 + Iy2;
@@ -34,6 +37,7 @@ Mat computeHarrisResponse(Mat img) {
 
 vector<DogKeypoint> getHarrisKeypoint(Mat grayImg, vector<vector<Mat>>& gaussSpace,int size, double threshold) {
 	Mat R = computeHarrisResponse(grayImg);
+	cout << "Find harris keypoints with window size for non-max suppression being " << size << ", threshold is " << threshold << "\n";
 	vector<DogKeypoint> res;
 	double sigma = 1;
 	for (int i = 0; i < R.rows; i += size) {
@@ -78,6 +82,7 @@ vector<DogKeypoint> getHarrisKeypoint(Mat grayImg, vector<vector<Mat>>& gaussSpa
 }
 
 Mat detectHarrist(Mat grayImg, Mat originalImg, int size, double threshold, Scalar lineColor) {
+	cout << "detecting harris corners with window size for non-max suppression of " << size << ", contrast threshold " << threshold;
 	Mat R = computeHarrisResponse(grayImg);
 	for (int i = 0; i < R.rows; i += size) {
 		for (int j = 0; j < R.cols; j += size) {
@@ -99,7 +104,7 @@ Mat detectHarrist(Mat grayImg, Mat originalImg, int size, double threshold, Scal
 				}
 			}
 			if (marked)
-				circle(originalImg, Point(c_ind, r_ind), 1, lineColor);
+				circle(originalImg, Point(c_ind, r_ind), 2, lineColor);
 
 		}
 	}

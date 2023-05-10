@@ -14,6 +14,7 @@ private:
 	int numSpace;
 	double minSigma;
 	double assumedSigma;
+	vector<Mat> kernel;
 	vector<vector<Mat>> dogSpace;
 	vector<vector<Mat>> gaussSpace;
 	vector<DogKeypoint> keypoints;
@@ -28,6 +29,7 @@ public:
 		gaussSpace = vector<vector<Mat>>(numOctave);
 		dogSpace = vector<vector<Mat>>(numOctave);
 	}
+	void generateKernel();
 	void computeGaussSpace();
 	void computeDoGSpace();
 	void findExtremaOfDogSpace(double threshold);
@@ -57,10 +59,8 @@ public:
 	
 };
 
-
-Mat detectDog(Mat img, Mat oc);
+Mat detectDog(Mat img, Mat oc, int numOctave, int numLayer, double minSigma, double contrastThreshold, double edgeThreshold);
 
 
 
 vector<DogKeypoint> findInterestedPoints(Mat img, vector<vector<Mat>>& gaussSpace);
-Mat matchBySIFT(Mat img1, Mat img2, double relativeThreshold, Mat originalImg1, Mat originalImg2);

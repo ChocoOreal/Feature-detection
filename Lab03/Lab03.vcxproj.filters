@@ -30,9 +30,6 @@
     <ClCompile Include="blob.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="parallelFilter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -51,9 +48,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="blob.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="parallelFilter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dog.h">
@@ -92,6 +86,18 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="D:\CV\02_.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="D:\CV\TestImages\04.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="D:\CV\training_images\01_1.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="D:\CV\training_images\01_3.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="D:\CV\TestImages\01.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

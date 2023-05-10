@@ -36,5 +36,5 @@ public:
 	vector<vector<Mat>> getGaussSpace();
 };
 
-Mat detectBlob(Mat img, Mat originalImg, float threshold);
+Mat detectBlob(Mat img, Mat originalImg, float threshold, double baseSigma, int scaleSpaceSize);
 vector<DogKeypoint> findBlobInterestedPoints(Mat img, vector<vector<Mat>>& gaussSpace, float threshold);

@@ -1,28 +1,7 @@
 #include "blob.h"
 #include "filter.h"
-//Layer* scaleSpace(Mat img, int scaleSpaceSize, double base_sigma) {
-//	// Approximate LoG by DoG
-//	// DoG ~ sigma2 * LoG, so no need to multiply by sigma2 for scale normalization
-//	Mat loGaussian;
-//	Layer* scaleSpaceArray = new Layer[scaleSpaceSize];
-//	double factor = pow(2.0, 1.0);
-//	double sigma = factor;
-//	for (int i = 0; i < scaleSpaceSize; i++) {
-//		int kernelSize = floor(sigma) * 6 + 1; // ensure the kernel size wouldnt be too small for a certain sigma
-//		double* kernel = new double[kernelSize * kernelSize];
-//		NormLoG(kernel, kernelSize, sigma);
-//		Mat loGaussian = Mat(kernelSize, kernelSize, CV_64F, kernel);
-//
-//		
-//		filter2D(img, scaleSpaceArray[i].convoledImg, -1, loGaussian, Point(-1, -1), 0.0, BORDER_CONSTANT);
-//		cout << scaleSpaceArray[i].convoledImg.rows << " " << scaleSpaceArray[i].convoledImg.cols << "\n";
-//		scaleSpaceArray[i].sigma = sigma;
-//		sigma *= factor;
-//		delete[] kernel;
-//	}
-//
-//	return scaleSpaceArray;
-//}
+
+
 
 
 void Blob::findBlobKeyPoints(float threshold) {
@@ -72,13 +51,11 @@ void Blob::findBlobKeyPoints(float threshold) {
 }
 
 void Blob::findScaleSpace() {
-	double factor = pow(2.0, (double)1 / scaleSpaceSize);
-	//cout << scaleSpaceSize << "\t" << factor << "\n";
+	double factor = pow(2.0, 0.5);
 	double k = factor;
 	for (int i = 1; i < scaleSpaceSize + 2; i++) {
-		if (i % 3 == 0) sigma[i - 1] *= 2;
+		//if (i % 3 == 0) sigma[i - 1] *= 2;
 		sigma[i] = sigma[i - 1] * factor;
-		//cout << sigma[i] << "\n";
 	}
 }
 
@@ -108,9 +85,9 @@ vector<vector<Mat>> Blob::getGaussSpace() {
 	return gaussSpace;
 }
 
-Mat detectBlob(Mat img, Mat originalImg, float threshold) {
+Mat detectBlob(Mat img, Mat originalImg, float threshold, double baseSigma, int scaleSpaceSize) {
 	//vector<DogKeypoint> KPs = findBlobKeyPoints(img, threshold);
-	Blob blob1(img, 15, 1.0);
+	Blob blob1(img, scaleSpaceSize, baseSigma);
 	blob1.findScaleSpace();
 	blob1.convolveImgWithLoG();
 	blob1.findBlobKeyPoints(threshold);
@@ -123,12 +100,16 @@ Mat detectBlob(Mat img, Mat originalImg, float threshold) {
 }
 
 vector<DogKeypoint> findBlobInterestedPoints(Mat img, vector<vector<Mat>>& gaussSpace,float threshold) {
+	int sigmaCount = 17;
+	double baseSigma = 1;
 	//vector<DogKeypoint> KPs = findBlobKeyPoints(img, threshold);
-	Blob blob1(img, 15, 1.0);
+	cout << "Find blob with " << sigmaCount << "sigma values, base sigma is " << baseSigma << "\n";
+	Blob blob1(img, sigmaCount, baseSigma);
 	blob1.findScaleSpace();
 	blob1.convolveImgWithLoG();
 	blob1.findBlobKeyPoints(threshold);
 	vector<DogKeypoint> KPs = blob1.getKeypoints();
+	cout << "Total keypoints found " << KPs.size() << "\n";
 	gaussSpace = blob1.getGaussSpace();
 	return KPs;
 }

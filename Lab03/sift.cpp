@@ -53,15 +53,13 @@ void MySIFT::computeOrientation(double minDist, double oriScale, int nbins, doub
 			for (int i = floor((x - 3 * currentScale) / dist); i < floor((x + 3 * currentScale) / dist); i++) {
 				for (int j = floor((y - 3 * currentScale) / dist); j < floor((y + 3 * currentScale) / dist); j++) {
 					// compute gradient wrt x
-					/*double dx = (gaussSpace[it->octave][layer].at<double>(i + 1, j) -
-						gaussSpace[it->octave][layer].at<double>(i - 1, j)) / 2;*/
+					
 
 					double dx = gradX[it->octave][layer].at<double>(i, j);
 
 
 					// compute gradient wrt y
-					/*double dy = (gaussSpace[it->octave][layer].at<double>(i, j + 1) -
-						gaussSpace[it->octave][layer].at<double>(i, j - 1)) / 2;*/
+					
 					double dy = gradY[it->octave][layer].at<double>(i, j);
 
 
@@ -325,14 +323,14 @@ Mat matchBySIFT(Mat img1, Mat img2, int detector,double relativeThreshold, Mat o
 	Mat res(newrows, newcols, originalImg1.type());
 	originalImg1.copyTo(res(Rect(0, 0, img1.cols, img1.rows)));
 	originalImg2.copyTo(res(Rect(img1.cols, 0, img2.cols, img2.rows)));
-	
-	for (int i = 0; i < keypointmatch.size() - 2; i += 2) {
+	int N = keypointmatch.size() - 1;
+	for (int i = 0; i < N; i += 2) {
 		int R = rand() % (255);
 		int G = rand() % (255);
 		int B = rand() % (255);
 		int ind1 = keypointmatch[i];
 		int ind2 = keypointmatch[i + 1];
-		line(res, Point(siftkps1[ind1].y, siftkps1[ind1].x), Point(siftkps2[ind2].y + img1.cols, siftkps2[ind2].x), Scalar(B, G, R));
+		line(res, Point(siftkps1[ind1].y, siftkps1[ind1].x), Point(siftkps2[ind2].y + img1.cols, siftkps2[ind2].x), Scalar(B, G, R), 1);
 	}
 
 	return res;

@@ -137,7 +137,6 @@
     <ClCompile Include="filter.cpp" />
     <ClCompile Include="harris.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="parallelFilter.cpp" />
     <ClCompile Include="sift.cpp" />
     <ClCompile Include="sobel.cpp" />
   </ItemGroup>
@@ -146,7 +145,6 @@
     <ClInclude Include="dog.h" />
     <ClInclude Include="filter.h" />
     <ClInclude Include="harris.h" />
-    <ClInclude Include="parallelFilter.h" />
     <ClInclude Include="sift.h" />
     <ClInclude Include="sobel.h" />
     <ClInclude Include="structure.h" />
@@ -158,7 +156,11 @@
     <Image Include="..\..\..\..\Pictures\girl3.jpg" />
     <Image Include="..\..\..\..\Pictures\sunflowers.jpeg" />
     <Image Include="D:\CV\02_.jpg" />
+    <Image Include="D:\CV\TestImages\01.jpg" />
     <Image Include="D:\CV\TestImages\02.jpg" />
+    <Image Include="D:\CV\TestImages\04.jpg" />
+    <Image Include="D:\CV\training_images\01_1.jpg" />
+    <Image Include="D:\CV\training_images\01_3.jpg" />
     <Image Include="D:\Pics\girl.jpg" />
     <Image Include="D:\Pics\tea.jpg" />
   </ItemGroup>

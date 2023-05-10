@@ -6,9 +6,9 @@ int detectBySobel(Mat src, Mat& dst, int direction) {
 	double kerH[9] = { 1.0, 2.0, 1.0,
 					  0.0, 0.0, 0.0,
 					 -1.0, -2.0, -1.0 };
-	Mat img_padded;
+	/*Mat img_padded;
 	copyMakeBorder(src, img_padded, 1, 1, 1, 1, BORDER_CONSTANT);
-	if (img_padded.empty()) return 0;
+	if (img_padded.empty()) return 0;*/
 	
 	Mat kernelH, kernelV, edgeH, edgeV, mag;
 	
@@ -18,12 +18,14 @@ int detectBySobel(Mat src, Mat& dst, int direction) {
 	edgeH.convertTo(edgeH, CV_8UC1, 1 / 256.0);*/
 	if (direction == 0 || direction == -1) {
 		kernelH = Mat(3, 3, CV_64F, kerH);
-		edgeH = filter(img_padded, kernelH);
+		//edgeH = filter(img_padded, kernelH);
+		filter2D(src, edgeH, -1, kernelH, Point(-1, -1), 0.0, BORDER_CONSTANT);
 		if (edgeH.empty()) return 0;
 	}
 	if (direction == 1 || direction == -1) {
 		kernelV = Mat(3, 3, CV_64F, kerV);
-		edgeV = filter(img_padded, kernelV);
+		//edgeV = filter(img_padded, kernelV);
+		filter2D(src, edgeV, -1, kernelV, Point(-1, -1), 0.0, BORDER_CONSTANT);
 		if (edgeV.empty()) return 0;
 
 	}
